@@ -1,0 +1,169 @@
+---
+title: 'DATA 607 Assignment #3'
+author: "Kristin Lussi"
+output:
+  html_document: default
+  pdf_document: default
+date: "2023-09-24"
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Question 1:
+
+Using the 173 majors listed in fivethirtyeight.com's College Majors
+dataset
+[<https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/>],
+provide code that identifies the majors that contain either "DATA" or
+"STATISTICS"
+
+```{r, include = FALSE, warning = FALSE}
+library(readr)
+library(stringr)
+library(dplyr)
+```
+
+***Answer:***
+
+```{r, warning = FALSE}
+# retrieve the csv file from GitHub
+urlfile = "https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/majors-list.csv"
+
+collegemajors <- read_csv(url(urlfile), show_col_types = FALSE)
+
+# filter the Major column of the collegemajors database to include only strings that contain the words "data" or "statistics"
+data_or_stats <- collegemajors %>%
+  filter(str_detect(Major, "DATA | STATISTICS")) 
+
+# select only the major column to show the filtered majors
+filtered_majors <- data_or_stats %>%
+  select(Major) %>%
+  distinct(Major)
+
+# change the tibble to a data frame
+filtered_majors <- data.frame(filtered_majors)
+
+# show the data frame
+filtered_majors
+```
+
+## Question 2:
+
+Write code that transforms the data below:
+
+[1] "bell pepper" "bilberry" "blackberry" "blood orange" [5] "blueberry"
+"cantaloupe" "chili pepper" "cloudberry"\
+[9] "elderberry" "lime" "lychee" "mulberry"\
+[13] "olive" "salal berry"
+
+Into a format like this:
+
+c("bell pepper", "bilberry", "blackberry", "blood orange", "blueberry",
+"cantaloupe", "chili pepper", "cloudberry", "elderberry", "lime",
+"lychee", "mulberry", "olive", "salal berry")
+
+***Answer:***
+
+```{r}
+library(stringr)
+
+# recreate the character vector
+fruit_vector <- c(
+  "bell pepper", "bilberry", "blackberry", "blood orange",
+  "blueberry", "cantaloupe", "chili pepper", "cloudberry",
+  "elderberry", "lime", "lychee", "mulberry",
+  "olive", "salal berry"
+)
+
+# convert the character vector into a string
+fruit_string <- str_c("c(", str_c('"', fruit_vector, '"', collapse = ", "), ")", sep = "")
+
+# Remove backslashes from the fruit string
+formatted_string <- gsub("\\\\", "", fruit_string, fixed = TRUE)
+
+# Print the fruit string
+cat(formatted_string, sep = "\n")
+```
+
+## Question 3:
+
+Describe, in words, what these expressions will match: a. (.)\\1\\1 b.
+"(.)(.)\\2\\1" c. (..)\\1 d. "(.).\\1.\\1" e. "(.)(.)(.).\*\\3\\2\\1"
+
+***Answer:***
+
+a.  (.)\\1\\1 will match any 3 consecutive characters in a string. For
+    example, "aaa".
+
+b.  "(.)(.)\\2\\1" will match the a string where the first and second
+    characters are repeated in reverse order. For example, "abba",
+    "1221", etc.
+
+c.  (..)\\1 captures 2 consecutive characters and stores them in the
+    same capturing group. This will match any expression that have a
+    repeated pair of characters (i.e. banana)
+
+d.  "(.).\\1.\\1" captures 3 consecutive characters from a string. The
+    first character is captured by the group, the second character is
+    matched by the ".", and the third character is matched by the final
+    ".". This will match any expression that has similar 3-character
+    sequences, i.e. "axaxa", "cbcbc", or "12121".
+
+e.  "(.)(.)(.).*\\3\\2\\1" captures 3 characters into 3 separate
+    capturing groups, then the ".*" outside the "()" matches 0 or more
+    characters. "\\3\\2\\1" matches the same characters as previously
+    captured, but in reverse order. Examples: "xyz123zyx", "123456321",
+    or "hannah".
+
+## Question 4:
+
+Construct regular expressions to match words that: 
+
+- Start and end with
+the same character. 
+
+- Contain a repeated pair of letters (e.g. "church"
+contains "ch" repeated twice.) 
+
+- Contain one letter repeated in at least
+three places (e.g. "eleven" contains three "e"s.)
+
+***Answer:***
+
+Start and end with the same character: "(.).\*\\1" Example:
+
+```{r}
+stringx <- "abcba"
+str_view(stringx, "(.).*\\1")
+```
+
+Contain a repeated pair of letters (e.g. "church" contains "ch" repeated
+twice): "(..).\*\\1"
+
+```{r}
+church <- "church"
+str_view(church, "(..).*\\1")
+```
+
+Contain one letter repeated in at least three places (e.g. "eleven"
+contains three "e"s.): "
+
+```{r}
+eleven <- "eleven"
+str_view(eleven, "([a-z]).*\\1.*\\1")
+```
+
+## Sources
+
+Title: "The Economic Guide to Picking a College Major."
+Author/Organization: FiveThirtyEight. URL:
+<https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/>
+
+Title: GitHub Repository for FiveThirtyEight College Majors Data
+Author/Organization: FiveThirtyEight URL:
+<https://github.com/fivethirtyeight/data/blob/15f210532b2a642e85738ddefa7a2945d47e2585/college-majors/majors-list.csv>
